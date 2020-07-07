@@ -102,7 +102,7 @@
 
 3.  프로그램 기능
 
-   ![program_ui](C:\Users\82107\Desktop\정리\prostate_cancer_predict_program\program_image\program_ui.png)
+   ![program_ui](.\program_image\program_ui.png)
 
    * 환자 검색 기능
 
