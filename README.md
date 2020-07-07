@@ -102,7 +102,7 @@
 
 3.  프로그램 기능
 
-   ![program_ui](.\program_image\program_ui.png)
+   ![program_ui](./program_image/program_ui.png)
 
    * 환자 검색 기능
 
