@@ -6,8 +6,6 @@
     │  README.md
     │  server_connect.py
     │  service.py
-    │  test.txt
-    │  tree_viex.txt
     │  
     ├─.idea
     │  │  .gitignore
@@ -35,9 +33,7 @@
             ui.cpython-37.pyc
 ```
 
-
-
-
+service.py 실행 
 
 
 
