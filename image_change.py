@@ -30,32 +30,6 @@ def otsu_filter(channel, gaussian_blur=True):
 
 def detect_tissue(input_slide, sensitivity=3000):
 
-    """
-    Description
-    ----------
-    Find RoIs containing tissue in WSI.
-    Generate mask locating tissue in an WSI. Inspired by method used by
-    Wang et al. [1]_.
-    .. [1] Dayong Wang, Aditya Khosla, Rishab Gargeya, Humayun Irshad, Andrew
-    H. Beck, "Deep Learning for Identifying Metastatic Breast Cancer",
-    arXiv:1606.05718
-    Credit: Github-wsipre
-
-    Parameters
-    ----------
-    input_slide: numpy array
-        Slide to detect tissue on.
-    sensitivity: int
-        The desired sensitivty of the model to detect tissue. The baseline is set
-        at 3000 and should be adjusted down to capture more potential issue and
-        adjusted up to be more agressive with trimming the slide.
-
-    Returns (3)
-    -------
-    -Tissue binary mask as numpy 2D array,
-    -Tiers investigated,
-    -Time Stamps from running tissue detection pipeline
-    """
 
     # For timing
     time_stamps = {}
@@ -85,29 +59,7 @@ def detect_tissue(input_slide, sensitivity=3000):
 
 
 def draw_tissue_polygons(input_slide, tissue_contours, plot_type, line_thickness=None):
-
-    """
-    Description
-    ----------
-    Plot Tissue Contours as numpy array on.
-    Credit: Github-wsipre
-
-    Parameters
-    ----------
-    input_slide: numpy array
-        Slide to draw contours onto
-    tissue_contours: numpy array
-        These are the identified tissue regions as cv2 contours
-    plot_type: str ("line" | "area")
-        The desired display type for the tissue regions
-    line_thickness: int
-        If the polygon_type=="line" then this parameter sets thickness
-
-    Returns (1)
-    -------
-    - Numpy array of tissue mask plotted
-    """
-
+    
     tissue_color = 1
 
     for cnt in tissue_contours:
@@ -128,25 +80,6 @@ def draw_tissue_polygons(input_slide, tissue_contours, plot_type, line_thickness
 
 def tissue_cutout(input_slide, tissue_contours):
 
-    """
-    Description
-    ----------
-    Set all parts of the in_slide to black except for those
-    within the provided tissue contours
-    Credit: https://stackoverflow.com/a/28759496
-
-    Parameters
-    ----------
-    input_slide: numpy array
-            Slide to cut non-tissue backgound out
-    tissue_contours: numpy array
-            These are the identified tissue regions as cv2 contours
-
-    Returns (1)
-    -------
-    - Numpy array of slide with non-tissue set to black
-    """
-
     # Get intermediate slide
     base_slide_mask = np.zeros(input_slide.shape[:2])
 
@@ -165,26 +98,6 @@ def tissue_cutout(input_slide, tissue_contours):
 
 def getSubImage(input_slide, rect):
 
-    """
-    Description
-    ----------
-    Take a cv2 rectagle object and remove its contents from
-    a source image.
-    Credit: https://stackoverflow.com/a/48553593
-
-    Parameters
-    ----------
-    input_slide: numpy array
-            Slide to pull subimage off
-    rect: cv2 rect
-        cv2 rectagle object with a shape of-
-            ((center_x,center_y), (hight,width), angle)
-
-    Returns (1)
-    -------
-    - Numpy array of rectalge data cut from input slide
-    """
-
     width = int(rect[1][0])
     height = int(rect[1][1])
     box = cv2.boxPoints(rect)
@@ -201,24 +114,7 @@ def getSubImage(input_slide, rect):
 
 def color_cut(in_slide, color = [255,255,255]):
 
-    """
-    Description
-    ----------
-    Take a input image and remove all rows or columns that
-    are only made of the input color [R,G,B]. The default color
-    to cut from image is white.
-
-    Parameters
-    ----------
-    input_slide: numpy array
-        Slide to cut white cols/rows
-    color: list
-        List of [R,G,B] pixels to cut from the input slide
-
-    Returns (1)
-    -------
-    - Numpy array of input_slide with white removed
-    """
+    
     #Remove by row
     row_not_blank = [row.all() for row in ~np.all(in_slide == color, axis=1)]
     output_slide = in_slide[row_not_blank, :]
@@ -228,40 +124,8 @@ def color_cut(in_slide, color = [255,255,255]):
     output_slide = output_slide[:, col_not_blank]
     return output_slide
 
-def detect_and_crop(image_location,sensitivity= 3000,downsample_lvl= -1,show_plots= "simple"):
-
-    """
-    Description
-    ----------
-    This method performs the pipeline as described in the notebook:
-    https://www.kaggle.com/dannellyz/panda-tissue-detection-size-optimization-70
-
-    Parameters
-    ----------
-    image_location:str
-        Location of the slide image to process
-    sensitivity:int
-        The desired sensitivty of the model to detect tissue. The baseline is set
-        at 3000 and should be adjusted down to capture more potential issue and
-        adjusted up to be more agressive with trimming the slide.
-    downsample_lvl: int
-        The level at which to downsample the slide. This can be referenced in
-        reverse order to access the lowest resoltuion items first.
-        [-1] = lowest resolution
-        [0] = highest resolution
-    show_plots: str (verbose|simple|none)
-        The types of plots to display:
-            - verbose - show all steps of process
-            - simple - show only last step
-            - none - show none of the plots
-
-    Returns (4)
-    -------
-    - Numpy array of final produciton(prod) slide
-    - Percent memory reduciton from original slide
-    - Time stamps from stages of the pipeline
-    - Time stamps from the Tissue Detect pipeline
-    """
+def detect_and_crop(image_location,sensitivity= 3000,downsample_lvl= -1,show_plots= "simple"):   
+    
 
     # For timing
     time_stamps = {}
@@ -339,26 +203,7 @@ def get_disk_size(numpy_image):
 
 
 def plot_figures(figures, nrows=1, ncols=1):
-
-    """
-    Description
-    ----------
-    Plot a dictionary of figures.
-    Credit: https://stackoverflow.com/a/11172032
-
-    Parameters
-    ----------
-    figures: dict
-        <title, figure> for those to plot
-    ncols: int
-        number of columns of subplots wanted in the display
-    nrows: int
-        number of rows of subplots wanted in the figure
-
-    Returns(0)
-    ----------
-    """
-
+    
     fig, axeslist = plt.subplots(ncols=ncols, nrows=nrows)
     for ind, title in enumerate(figures):
         axeslist.ravel()[ind].imshow(figures[title], aspect="auto")
@@ -368,22 +213,7 @@ def plot_figures(figures, nrows=1, ncols=1):
     return
 
 
-def get_timings(time_stamp_dict, verbose = False):
-    """
-    Description
-    ----------
-    Get timing defferentials and percentages from a dictionary of timestamps
-
-    Parameters
-    ----------
-    time_stamp_dict: dict
-        <description:time> for each of the measured time points
-
-    Returns (2)
-    -------
-    - Dictionary with the time differentials at each time point
-    - Dictionary with the time percentages for each point compared to total
-    """
+def get_timings(time_stamp_dict, verbose = False):    
 
     time_diffs = {}
     dict_list = list(time_stamp_dict.items())
@@ -400,24 +230,7 @@ def get_timings(time_stamp_dict, verbose = False):
         print(json.dumps(time_stamp_dict, indent=4))
     return time_diffs, time_pcts
 
-def comp_timings(time_stamp_low, time_stamp_high, verbose=False):
-    """
-    Description
-    ----------
-    Take two timestamp dictionaries and compare them.
-
-    Parameters
-    ----------
-    time_stamp_low: dict
-        <description:time> for each of the measured time points (shorter process)
-    time_stamp_high: dict
-        <description:time> for each of the measured time points (longer process)
-
-    Returns (1)
-    -------
-    - Dictionary with the raw differences between the two dicts
-    - Dictionary with the percentage differences between the two dicts
-    """
+def comp_timings(time_stamp_low, time_stamp_high, verbose=False):    
 
     raw_comp = {k:time_stamp_high[k]-time_stamp_low[k] for k,v in time_stamp_low.items()}
     pct_comp = {k:time_stamp_low[k]/time_stamp_high[k] for k,v in time_stamp_low.items()}
@@ -432,7 +245,7 @@ def comp_timings(time_stamp_low, time_stamp_high, verbose=False):
 
 
 
-file_path = 'C:/Users/user/Desktop/QT/image/test1_1.png'
+
 
 def image_change_view(file_path):
     # Open slide on lowest resolution
@@ -475,12 +288,26 @@ def image_change_view(file_path):
 
     # ## Crop White Space From Image
     big_slide_cut = color_cut(scaled_smart_crop, color=[255,255,255])
+    big_slide_cut = cv2.rotate(big_slide_cut,cv2.ROTATE_90_CLOCKWISE)
 
     print(type(big_slide_cut))
     # plt.imshow(big_slide_cut)
     # plt.show()
     # image = np.array(big_slide_cut, dtype=np.float32).tobytes()
     # print(type(image))
-    cv2.imwrite("output.png",big_slide_cut)
+
+    if file_path == './output1.png':
+        big_slide_cut = cv2.cvtColor(big_slide_cut,cv2.COLOR_BGR2RGB)
+        cv2.imwrite("output1.png",big_slide_cut)
+    else:
+        cv2.imwrite("output.png",big_slide_cut)
+
+
+def image_change_view2(file_path):
+    image = cv2.imread(file_path)
+    image = cv2.cvtColor(image,cv2.COLOR_RGB2BGR)
+    image = cv2.rotate(image, cv2.ROTATE_90_COUNTERCLOCKWISE)
+
+    cv2.imwrite("{}".format(file_path),image)
 
 

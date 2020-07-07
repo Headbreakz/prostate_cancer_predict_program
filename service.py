@@ -5,11 +5,14 @@ from PyQt5.QtWidgets import QApplication, QMainWindow, QWidget, QLabel, QLineEdi
 from PyQt5.QtGui import *
 from PyQt5.QtCore import QTimer, Qt, QDate, QRectF
 
-from test import Ui_MainWindow
-from predict2 import var
+from ui import Ui_MainWindow
+# from predict2 import var
+from image_change import image_change_view
+from server_connect import aws_connect,aws_connect2
 import sys
 import sqlite3
-# import cv2
+import cv2
+
 
 
 # class sql(QWidget):
@@ -116,9 +119,9 @@ class test(QMainWindow, Ui_MainWindow):
             self.info_image.setData(self.info_image.index(i, 2), ar1[i][2])
 
 
-
+        #환자 검색
     def search_patient_list(self):
-        self.patient_list_fun = 1
+        self.patient_list_fun = 0
         b = self.info.rowCount()
         for i in range(b):
             self.info.removeRow(i)
@@ -151,6 +154,7 @@ class test(QMainWindow, Ui_MainWindow):
 
 
     def show_patient_image(self):
+        print('show patient')
         self.cmd = "select test_day,image_name,etc FROM patient_image where patient_name = '" + self.patient_name + "'"
         self.cur.execute(self.cmd)
         self.conn.commit()
@@ -161,15 +165,20 @@ class test(QMainWindow, Ui_MainWindow):
         self.etc = ar[a][2]
         print(self.patient_image_file)
 
+        image_change_view('./image/' + self.patient_image_file + '.png')
         self.qPixmapVar = QPixmap()
-        self.qPixmapVar.load('C:/Users/user/Desktop/QT/image/' + self.patient_image_file + '.png')
-        self.qPixmapVar_size = self.qPixmapVar.size()
+        # print("check1")
+        self.qPixmapVar.load('./output.png')
+        # print("check2")
+        self.qPixmapVar_1 = self.qPixmapVar
+        # self.qPixmapVar_size = self.qPixmapVar.size()
         # print(self.qPixmapVar_size.width())
+        # print(self.qPixmapVar_size.height())
 
-        if self.qPixmapVar_size.width() > self.qPixmapVar_size.height():
-            self.qPixmapVar = self.qPixmapVar.scaledToHeight(460)
-        else:
-            self.qPixmapVar = self.qPixmapVar.scaledToWidth(460)
+        # if self.qPixmapVar_size.width() > self.qPixmapVar_size.height():
+        #     self.qPixmapVar = self.qPixmapVar.scaledToHeight(460)
+        # else:
+        #     self.qPixmapVar = self.qPixmapVar.scaledToWidth(460)
 
         # self.qPixmapVar = self.qPixmapVar.scaled(480,480)
 
@@ -177,7 +186,7 @@ class test(QMainWindow, Ui_MainWindow):
         self.scene.addPixmap(self.qPixmapVar)
 
         self.graphicsView.setScene(self.scene)
-        print(self.qPixmapVar)
+
 
     def image_size_up(self):
         self.qPixmapVar = self.qPixmapVar.scaled((self.qPixmapVar.size().width())*1.2,(self.qPixmapVar.size().height())*1.2)
@@ -193,9 +202,9 @@ class test(QMainWindow, Ui_MainWindow):
         self.graphicsView.setScene(self.scene)
 
     def origin_image_size(self):
-        self.qPixmapVar.load('C:/Users/user/Desktop/QT/image/' + self.patient_image_file + '.png')
+        # self.qPixmapVar.load('C:/Users/user/Desktop/QT/image/' + self.patient_image_file + '.png')
         self.scene = QGraphicsScene()
-        self.scene.addPixmap(self.qPixmapVar)
+        self.scene.addPixmap(self.qPixmapVar_1)
         self.graphicsView.setScene(self.scene)
 
 
@@ -239,16 +248,46 @@ class test(QMainWindow, Ui_MainWindow):
             self.info.setData(self.info.index(i, 2), ar[i][2])
 
     def cancer_grade_predict(self):
-        self.path = 'C:/Users/user/Desktop/QT/image/' + self.patient_image_file + '.png'
+        self.path = './image/' + self.patient_image_file + '.png'
         # print(self.path)
         # self.isup_grade = var(self.path)
-        self.isup_grade =2
+        self.isup_grade = aws_connect(self.path)
+        # self.isup_grade =2
         print(self.isup_grade)
         self.lcdNumber.display(self.isup_grade)
 
+    def cancer_grade_segment(self):
+        self.path = './image/' + self.patient_image_file + '.png'
+        # print(self.path)
+        # self.isup_grade = var(self.path)
+        print("check11")
+
+        aws_connect2(self.path)
+        print("check12")
+        # self.isup_grade =2
+        # self.qPixmapVar = QPixmap()
+
+        self.img_test = cv2.imread('output1.png')
+        self.img_test = cv2.cvtColor(self.img_test,cv2.COLOR_RGB2BGR)
+        cv2.imwrite("output1.png", self.img_test)
+        
+        image_change_view('./output1.png')
+
+        self.qPixmapVar.load('./output1.png')
+        self.scene = QGraphicsScene()
+        self.scene.addPixmap(self.qPixmapVar)
+        self.graphicsView.setScene(self.scene)
+        
+        self.img_test = cv2.cvtColor(self.img_test,cv2.COLOR_BGR2RGB)
+        cv2.imwrite("output1.png", self.img_test)
+
+
     def image_copy(self):
-        self.qPixmapVar.save('C:/Users/user/Desktop/QT/image/' + self.patient_image_file +'{}{}{}.png'.format(self.day_year,self.day_month,self.day_day))
+        self.qPixmapVar.convertFromImage
+        #self.qPixmapVar.save('./image/' + self.patient_image_file +'{}{}{}.png'.format(self.day_year,self.day_month,self.day_day))
+        
         self.etc ="copy"
+        cv2.imwrite('./image/' + self.patient_image_file +'{}{}{}.png'.format(self.day_year,self.day_month,self.day_day), self.img_test)
         # print(type(self.patient_image_file))
         # print(type(self.etc))
         # print(type(self.patient_name))
@@ -286,15 +325,6 @@ class test(QMainWindow, Ui_MainWindow):
 
         self.patient_image_file =f'{self.patient_image_file}{self.day_year}{self.day_month}{self.day_day}'
         print(type(self.patient_image_file))
-
-
-
-
-
-
-
-
-
 
 
 app = QApplication(sys.argv)
